@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: Sans-serif;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <h1>Audio Book Helper</h1>
+    <p>This tool remembers the video URL and the timestamp. You can keep resuming where you left
+    off. YouTube like to forget the play position.</p>
+    <input type="text" id="video-url" placeholder="Enter video URL">
+    <button id="go-button">Go</button>
+    <p id="stored-playtime">Stored Timestamp:</p>
+</div>
+<hr>
+<div id="player"></div>
+<script src="https://www.youtube.com/player_api"></script>
+<script>
+    const goButton = document.getElementById("go-button");
+    const videoUrl = document.getElementById("video-url");
+    let player;
+    let interval;
+    let videoSrc = localStorage.getItem('videoSrc');
+    let isFirstLoad = true;
+
+    goButton.addEventListener("click", function () {
+        videoSrc = videoUrl.value;
+        if (!videoSrc) {
+            alert('Please Enter Video URL')
+        } else {
+            localStorage.setItem('videoSrc', videoSrc);
+            localStorage.setItem('currentTime', '0');
+            updateTimestampDisplay()
+            play(videoSrc);
+        }
+    });
+
+    function play(url) {
+        if (!url) {
+            alert('No URL, no play!');
+            return;
+        }
+        const videoId = url.split('v=')[1];
+        if (!videoId) {
+            alert('Could not extract video ID form URL: ' + url);
+            return;
+        }
+        window.YT.ready(function () {
+            if (player){
+                player.destroy();
+            }
+            player = new YT.Player('player', {
+                videoId: videoId,
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        });
+    }
+
+    function onPlayerReady(event) {
+        event.target.playVideo();
+        if (isFirstLoad) {
+            player.seekTo(localStorage.getItem('currentTime'), true);
+            isFirstLoad = false;
+        }
+    }
+
+    function updateTimestampDisplay() {
+        const currentTime = localStorage.getItem('currentTime');
+        document.getElementById("stored-playtime").innerHTML = 'Stored Timestamp: ' + Math.round(parseFloat(currentTime)) + ' seconds';
+    }
+
+    function onPlayerStateChange(event) {
+        if (interval) clearInterval(interval);
+        interval = setInterval(function () {
+            if (player && player.getCurrentTime() > 0) {
+                localStorage.setItem('currentTime', player.getCurrentTime());
+                updateTimestampDisplay();
+            }
+        }, 2000);
+    }
+
+    if (localStorage.getItem('videoSrc')) {
+        const storedSrc = localStorage.getItem('videoSrc');
+        videoUrl.value = storedSrc;
+        updateTimestampDisplay();
+        play(storedSrc);
+    }
+
+</script>
+</body>
+</html>
+

@@ -1,0 +1,108 @@
+body {
+    background-color: #2c3e50; /*Dark background color*/
+    font-family: 'Open Sans', sans-serif; /*Use of Open Sans font*/
+    color: #fff; /*Light text color*/
+    background-image: url('library.jpeg'); /* Adding the background image*/
+    background-size: cover; /* Covering the entire background with the image*/
+    background-position: center; /* Positioning the image at the center of the background*/
+    font-size: 1.5rem;
+}
+
+.container {
+    max-width: 800px; /*Limiting the width of the container*/
+    margin: 0 auto; /*Centering the container*/
+    padding: 40px; /* Adding padding to the container*/
+    background-color: rgba(0, 0, 0, 0.8); /* Adding a semi-transparent black background color to the text container*/
+    padding: 40px; /* Adding padding to the container*/
+}
+
+label,
+input {
+    font-size: 3rem;
+    max-width: 100%;
+}
+
+#play-button,
+#stop-button,
+#go-button {
+    background-color: #3498db; /* blue background*/
+    color: #fff; /*white text color*/
+    border: none; /* no border*/
+    padding: 10px 20px; /* padding */
+    cursor: pointer; /* cursor pointer*/
+    transition: all 0.3s ease; /* transition effect*/
+    text-shadow: 1px 1px #000; /* text-shadow effect*/
+    font-size: 2rem;
+    margin: 20px 20px 10px 0;
+}
+
+#play-button:disabled,
+#stop-button:disabled,
+#go-button:disabled {
+    background-color: #ccc; /* Change the background color to a light gray */
+    cursor: not-allowed; /* Change the cursor to "not-allowed" */
+    color: #999; /* Change the text color to a darker gray */
+    text-shadow: none; /*removing text-shadow effect*/
+}
+
+#stop-button {
+    background-color: #db346e;
+}
+
+#play-button {
+    background-color: #7fdb34;
+}
+
+#go-button {
+    margin-right: 100px;
+}
+
+#youtube-player-container {
+    padding-top: 20px;
+}
+
+#player {
+    width: 100%; /* Width of the youtube player*/
+    height: 500px; /* Height of the youtube player*/
+}
+
+p {
+    color: #fff; /* Setting the text color to white */
+    font-size: 1.2em; /* Increase the font size*/
+}
+
+#consent-button {
+    padding: 20px 40px; /* Increase the padding */
+    font-size: 1.2em; /* Increase the font size */
+    border-radius: 20px; /* Increase the border radius */
+    background-color: #c0392b; /* Change the background color on hover */
+    transform: scale(1.1); /* Add a scaling effect on hover */
+    border: 5px solid #fff;
+    border-top: 0px;
+    border-bottom: 0px;
+    margin: 40px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.img-desc {
+    color: #777;
+    font-size: 0.8rem;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    max-width: 40vw;
+    float: right;
+}
+
+#logo {
+    margin-right: 20px;
+    max-width: 10vw;
+}
+
+a {
+    color: #eee;
+}
+
+a:visited {
+    color: #ccc;
+}
