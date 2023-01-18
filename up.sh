@@ -16,5 +16,8 @@ if [[ $1 == '--rebuild' ]]; then
   docker build --no-cache -t resumeplay --label="resumeplay" .
 fi
 
-cd build
-docker run --name resumeplay_web -d --volume $(pwd)/..:/var/www/html -p $DOCKER_HOST_PORT:80 resumeplay
+
+docker run --name resumeplay_web \
+    -p $DOCKER_HOST_PORT:80 \
+    -v $(pwd)/src:/app \
+    -d webdevops/apache:latest

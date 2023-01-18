@@ -2,4 +2,4 @@
 set -e
 cd "$(dirname "$0")"
 
-docker exec -w /var/www/html -it resumeplay_web bash
+docker exec -it resumeplay_web bash
