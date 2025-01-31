@@ -2,24 +2,27 @@ body {
     background-color: #503e2c; /*Dark background color*/
     font-family: 'Open Sans', sans-serif; /*Use of Open Sans font*/
     color: #fff; /*Light text color*/
-    background-image: url('library.jpeg'); /* Adding the background image*/
-    background-size: contain; /* Covering the entire background with the image*/
-    background-position: center; /* Positioning the image at the center of the background*/
-    font-size: 1.5rem;
+    font-size: 1rem;
+    padding: 0;
+    margin: 0;
 }
 
 .container {
     max-width: 1024px; /*Limiting the width of the container*/
     margin: 0 auto; /*Centering the container*/
-    padding: 40px; /* Adding padding to the container*/
     background-color: rgba(0, 0, 0, 0.8); /* Adding a semi-transparent black background color to the text container*/
-    padding: 40px; /* Adding padding to the container*/
+    padding: 20px; /* Adding padding to the container*/
 }
 
 label,
 input {
-    font-size: 3rem;
+    font-size: 1.5rem;
     max-width: 100%;
+    width: 100%;
+}
+
+input {
+    padding: 10px;
 }
 
 #play-button,
@@ -64,11 +67,6 @@ input {
 #player {
     width: 100%; /* Width of the youtube player*/
     height: 500px; /* Height of the youtube player*/
-}
-
-p {
-    color: #fff; /* Setting the text color to white */
-    font-size: 1.2em; /* Increase the font size*/
 }
 
 #consent-button {
