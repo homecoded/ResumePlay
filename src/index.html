@@ -1,164 +1,200 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>ResumePlay</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <link rel="manifest" href="manifest.json">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <link rel="icon" type="image/png" sizes="16x16" href="icon-16x16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="icon-32x32.png">
-  <link rel="icon" type="image/png" sizes="96x96" href="icon-96x96.png">
+    <meta charset="utf-8">
+    <title>ResumePlay</title>
+    <link rel="stylesheet" type="text/css" href="style.css?id=374">
+    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="icon" type="image/png" sizes="16x16" href="icon-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="icon-96x96.png">
 </head>
 <body>
 <div class="container">
-  <h1><img src="logo.jpeg" id="logo">ResumePlay</h1>
-  <p>Introducing ResumePlay, the revolutionary web application that allows you to seamlessly pick up where you left off
-    on your favorite YouTube audiobooks. Say goodbye to the frustration of losing your play position and hello to an
-    uninterrupted listening experience.</p>
-  <div class="youtube-url">
-    <label for="video-url">Enter YouTube URL:</label>
-    <input type="text" id="video-url" placeholder="Enter video URL" value="https://www.youtube.com/watch?v=BxR3EF690oo">
-    <div id="controls">
-      <button id="go-button" disabled>LOAD</button>
-      <button id="play-button" disabled>&#9658;</button>
-      <button id="stop-button" disabled>&#9724;</button>
+    <h1><img src="logo.jpeg" id="logo">ResumePlay</h1>
+    <p>
+        Introducing ResumePlay, the useful web application that allows you to seamlessly pick up where you left
+        off on your favorite YouTube audiobooks. Say goodbye to the frustration of losing your play position and
+        hello to an uninterrupted listening experience.
+    </p>
+    <div class="youtube-url">
+        <label for="video-url">Enter YouTube URL:</label>
+        <input type="text" id="video-url" placeholder="Enter video URL"
+               value="https://www.youtube.com/watch?v=BxR3EF690oo">
+        <div id="controls">
+            <button title="load" id="load-button" disabled>LOAD</button>
+            <button title="play" id="play-button" disabled>&#9658;</button>
+            <button title="pause" id="stop-button" disabled>&#9646;&#9646;</button>
+            <div class="toggle-skipping">
+                <label class="switch">
+                    <input id="skip-toggler" type="checkbox" checked="1">
+                    <span class="slider"></span>
+                </label>
+                <span class="label"><strong>Toggle skip protection</strong></span>
+            </div>
+        </div>
     </div>
-  </div>
-  <p id="stored-playtime">Stored Timestamp:</p>
-  <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers. I
-    understand that Google places cookies on my computer and is able to see my IP-address while this website downloads
-    the code. This website does no tracking itself.
-  </button>
+    <p id="stored-playtime">Stored Timestamp:</p>
+    <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers.
+        I understand that Google places cookies on my computer and is able to see my IP-address while this website
+        downloads the code. This website does no tracking itself.
+    </button>
 </div>
 <div id="youtube-player-container">
-  <div id="player"></div>
+    <div id="player"></div>
 </div>
 <script type="text/javascript">
 
-  function initApplication() {
-    loadDependencies(
-      function () {
-        const goButton = document.getElementById("go-button");
-        const stopButton = document.getElementById("stop-button");
-        const playButton = document.getElementById("play-button");
-        const videoUrl = document.getElementById("video-url");
-        let player;
-        let interval;
-        let videoSrc = localStorage.getItem('videoSrc');
+    function initApplication() {
+        loadDependencies(
+            function () {
+                const loadButton = document.getElementById("load-button");
+                const stopButton = document.getElementById("stop-button");
+                const playButton = document.getElementById("play-button");
+                const videoUrl = document.getElementById("video-url");
+                let player;
+                let interval;
+                let videoSrc = localStorage.getItem('videoSrc');
 
-        goButton.addEventListener("click", function () {
-          videoSrc = videoUrl.value;
-          if (!videoSrc) {
-            alert('Please Enter Video URL')
-          } else {
-            localStorage.setItem('videoSrc', videoSrc);
-            localStorage.setItem('currentTime', '0');
-            updateTimestampDisplay()
-            play(videoSrc);
-          }
-        });
+                loadButton.addEventListener("click", function () {
+                    videoSrc = videoUrl.value;
+                    if (!videoSrc) {
+                        alert('Please Enter Video URL')
+                    } else {
+                        document.getElementById("stop-button").disabled = false;
+                        document.getElementById("play-button").disabled = false;
+                        localStorage.setItem('videoSrc', videoSrc);
+                        localStorage.setItem('currentTime', '0');
+                        updateTimestampDisplay()
+                        play(videoSrc);
+                    }
+                });
 
-        stopButton.addEventListener("click", function (){
-          if (player){
-            player.pauseVideo();
-          }
-        });
+                stopButton.addEventListener("click", function () {
+                    if (player) {
+                        player.pauseVideo();
+                    }
+                });
 
-        playButton.addEventListener("click", function (){
-          if (player){
-            player.playVideo();
-          }
-        });
+                playButton.addEventListener("click", function () {
+                    if (player) {
+                        player.playVideo();
+                    }
+                });
 
-        function play(url) {
-          if (!url) {
-            alert('No URL, no play!');
-            return;
-          }
-          const videoId = url.split('v=')[1];
-          if (!videoId) {
-            alert('Could not extract video ID form URL: ' + url);
-            return;
-          }
-          window.YT.ready(function () {
-            if (player){
-              player.destroy();
+                function play(url) {
+                    if (!url) {
+                        alert('No URL, no play!');
+                        return;
+                    }
+                    let videoId = url.split('v=')[1];
+                    if (videoId.indexOf('&')) {
+                        videoId = videoId.split('&')[0];
+                    }
+                    if (!videoId) {
+                        alert('Could not extract video ID form URL: ' + url);
+                        return;
+                    }
+                    window.YT.ready(function () {
+                        if (player) {
+                            player.destroy();
+                        }
+                        player = new YT.Player('player', {
+                            videoId: videoId,
+                            events: {
+                                'onReady': onPlayerReady,
+                                'onStateChange': onPlayerStateChange
+                            }
+                        });
+                    });
+                }
+
+                function onPlayerReady(event) {
+                    event.target.seekTo(localStorage.getItem('currentTime'), true);
+                }
+
+                function padTime(time) {
+                    if (time < 10) {
+                        return '0' + time;
+                    }
+                    return time;
+                }
+
+                function updateTimestampDisplay() {
+                    let currentTime = localStorage.getItem('currentTime');
+
+                    const hours = Math.floor(currentTime / 3600);
+                    currentTime -= hours * 3600;
+                    const mins = Math.floor(currentTime / 60);
+                    currentTime -= mins * 60;
+                    const secs = Math.floor(currentTime);
+
+                    document.getElementById("stored-playtime").innerHTML =
+                        'Stored Timestamp: ' + padTime(hours) + ':' + padTime(mins) + ':' + padTime(secs);
+                }
+
+                function onPlayerStateChange(event) {
+                    if (interval) clearInterval(interval);
+                    interval = setInterval(function () {
+                        if (player && player.getCurrentTime() > 0 && player.getPlayerState() === 1) {
+                            let currentTime = localStorage.getItem('currentTime');
+                            let playerTime = player.getCurrentTime();
+                            if (document.getElementById('skip-toggler').checked) {
+                                if (Math.abs(playerTime - currentTime) > 2.5) {
+                                    playerTime = currentTime;
+                                    player.seekTo(playerTime, true);
+                                }
+                            }
+                            localStorage.setItem('currentTime', playerTime);
+                            updateTimestampDisplay();
+                        }
+                    }, 2000);
+                }
+
+                if (localStorage.getItem('videoSrc')) {
+                    const storedSrc = localStorage.getItem('videoSrc');
+                    videoUrl.value = storedSrc;
+                    updateTimestampDisplay();
+                    play(storedSrc);
+                }
             }
-            player = new YT.Player('player', {
-              videoId: videoId,
-              events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-              }
-            });
-          });
-        }
+        );
+    }
 
-        function onPlayerReady(event) {
-          event.target.seekTo(localStorage.getItem('currentTime'), true);
-        }
+    function loadDependencies(callback) {
+        const script = document.createElement('script');
+        script.onload = callback;
+        script.src = 'https://www.youtube.com/player_api';
+        document.head.appendChild(script);
+    }
 
-        function updateTimestampDisplay() {
-          const currentTime = localStorage.getItem('currentTime');
-          document.getElementById("stored-playtime").innerHTML = 'Stored Timestamp: ' + Math.round(parseFloat(currentTime)) + ' seconds';
-        }
-
-        function onPlayerStateChange(event) {
-          if (interval) clearInterval(interval);
-          interval = setInterval(function () {
-            if (player && player.getCurrentTime() > 0 && player.getPlayerState() === 1) {
-              localStorage.setItem('currentTime', player.getCurrentTime());
-              updateTimestampDisplay();
-            }
-          }, 2000);
-        }
-
-        if (localStorage.getItem('videoSrc')) {
-          const storedSrc = localStorage.getItem('videoSrc');
-          videoUrl.value = storedSrc;
-          updateTimestampDisplay();
-          play(storedSrc);
-        }
-      }
-    );
-  }
-
-  function loadDependencies(callback) {
-    const script = document.createElement('script');
-    script.onload = callback;
-    script.src = 'https://www.youtube.com/player_api';
-    document.head.appendChild(script);
-  }
-
-  document.getElementById("consent-button").addEventListener("click", function () {
-    document.cookie = "consent=true; expires=Fri, 31 Dec 9999 23:59:59 GMT";
-    document.getElementById("consent-button").style.display = "none";
-    document.getElementById("youtube-player-container").style.display = "block";
-    document.getElementById("go-button").disabled = false;
-    document.getElementById("stop-button").disabled = false;
-    document.getElementById("play-button").disabled = false;
-    initApplication();
-  });
-  if (document.cookie.indexOf("consent=true") >= 0) {
-    document.getElementById("youtube-player-container").style.display = "block";
-    document.getElementById("go-button").disabled = false;
-    document.getElementById("stop-button").disabled = false;
-    document.getElementById("play-button").disabled = false;
-    document.getElementById("consent-button").style.display = "none";
-    initApplication();
-  }
+    document.getElementById("consent-button").addEventListener("click", function () {
+        document.cookie = "consent=true; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+        document.getElementById("consent-button").style.display = "none";
+        document.getElementById("youtube-player-container").style.display = "block";
+        document.getElementById("load-button").disabled = false;
+        initApplication();
+    });
+    if (document.cookie.indexOf("consent=true") >= 0) {
+        document.getElementById("youtube-player-container").style.display = "block";
+        document.getElementById("load-button").disabled = false;
+        document.getElementById("stop-button").disabled = false;
+        document.getElementById("play-button").disabled = false;
+        document.getElementById("consent-button").style.display = "none";
+        initApplication();
+    }
 </script>
 <p class="img-desc">
-  Logo image created via Stable Diffusion with the prompt "Logo for a tech website for audio books, vector art,
-  flat design, award-winning, showing headphones, books".<br/><br/>
-  The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
-  <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
-  or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
-  YouTube-URL and a timestamp, which is required of the proper functioning of the application.
-  <br/><br/>
-  <a href="https://lazerbahn.com/impressum.html">Imprint</a>
-  <a href="https://lazerbahn.com/datenschutz.html">Data Privacy</a>
+    Logo image created via Stable Diffusion with the prompt "Logo for a tech website for audio books, vector art,
+    flat design, award-winning, showing headphones, books".<br/><br/>
+    The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
+    <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
+    or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
+    YouTube-URL and a timestamp, which is required of the proper functioning of the application.
+    <br/><br/>
+    <a href="https://lazerbahn.com/impressum.html">Imprint</a>
+    <a href="https://lazerbahn.com/datenschutz.html">Data Privacy</a>
 </p>
 </body>
 </html>
