@@ -13,10 +13,11 @@
 <body>
 <div class="container">
     <h1><img src="logo.jpeg" id="logo">ResumePlay</h1>
-    <p>Introducing ResumePlay, the revolutionary web application that allows you to seamlessly pick up where you left
-        off
-        on your favorite YouTube audiobooks. Say goodbye to the frustration of losing your play position and hello to an
-        uninterrupted listening experience.</p>
+    <p>
+        Introducing ResumePlay, the useful web application that allows you to seamlessly pick up where you left
+        off on your favorite YouTube audiobooks. Say goodbye to the frustration of losing your play position and
+        hello to an uninterrupted listening experience.
+    </p>
     <div class="youtube-url">
         <label for="video-url">Enter YouTube URL:</label>
         <input type="text" id="video-url" placeholder="Enter video URL"
@@ -27,19 +28,17 @@
             <button title="pause" id="stop-button" disabled>&#9646;&#9646;</button>
             <div class="toggle-skipping">
                 <label class="switch">
-                    <input type="checkbox">
+                    <input id="skip-toggler" type="checkbox" checked="1">
                     <span class="slider"></span>
                 </label>
-                Toggle skip protection
+                <span class="label"><strong>Toggle skip protection</strong></span>
             </div>
         </div>
     </div>
     <p id="stored-playtime">Stored Timestamp:</p>
     <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers.
-        I
-        understand that Google places cookies on my computer and is able to see my IP-address while this website
-        downloads
-        the code. This website does no tracking itself.
+        I understand that Google places cookies on my computer and is able to see my IP-address while this website
+        downloads the code. This website does no tracking itself.
     </button>
 </div>
 <div id="youtube-player-container">
@@ -139,7 +138,15 @@
                     if (interval) clearInterval(interval);
                     interval = setInterval(function () {
                         if (player && player.getCurrentTime() > 0 && player.getPlayerState() === 1) {
-                            localStorage.setItem('currentTime', player.getCurrentTime());
+                            let currentTime = localStorage.getItem('currentTime');
+                            let playerTime = player.getCurrentTime();
+                            if (document.getElementById('skip-toggler').checked) {
+                                if (Math.abs(playerTime - currentTime) > 2.5) {
+                                    playerTime = currentTime;
+                                    player.seekTo(playerTime, true);
+                                }
+                            }
+                            localStorage.setItem('currentTime', playerTime);
                             updateTimestampDisplay();
                         }
                     }, 2000);
