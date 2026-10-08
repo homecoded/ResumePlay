@@ -1,6 +1,6 @@
 {
   "short_name": "ResumePlay",
-  "name": "ResumePlay - Seamless YouTube audio books experience",
+  "name": "ResumePlay – keep your place in long YouTube videos",
   "icons": [
     {
       "src": "icon-192x192.png",
@@ -15,6 +15,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#3498db",
-  "background_color": "#fff"
+  "theme_color": "#0A0F2E",
+  "background_color": "#0A0F2E"
 }

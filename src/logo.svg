@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>ResumePlay</title>
+  <rect width="512" height="512" fill="#A81E1E"/>
+  <g fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round">
+    <path d="M158 232C150 160 190 138 256 138C322 138 362 160 354 232"/>
+    <path d="M180 148L164 184M332 148L348 184"/>
+    <circle cx="153" cy="243" r="11"/>
+    <circle cx="358" cy="242" r="12"/>
+    <path d="M157 256L166 284M354 256L346 284"/>
+    <path d="M106 352C102 270 252 264 258 342"/>
+    <path d="M254 342C260 264 410 270 406 352"/>
+    <ellipse cx="187" cy="350" rx="57" ry="52"/>
+    <ellipse cx="325" cy="350" rx="57" ry="52"/>
+    <circle cx="186" cy="350" r="16"/>
+    <circle cx="326" cy="350" r="16"/>
+  </g>
+</svg>

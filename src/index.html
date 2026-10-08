@@ -1,390 +1,155 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <title>ResumePlay</title>
-    <link rel="stylesheet" type="text/css" href="style.css?id=377">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Watch very long YouTube videos and series across many sessions. ResumePlay keeps your place.">
+    <meta name="theme-color" content="#0A0F2E">
+    <link rel="preload" href="fonts/PixelifySans.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="style.css?id=407">
     <link rel="manifest" href="manifest.json">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="icon" type="image/png" sizes="16x16" href="icon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon-32x32.png">
     <link rel="icon" type="image/png" sizes="96x96" href="icon-96x96.png">
 </head>
 <body>
-<div class="container">
-    <h1><img src="logo.jpeg" id="logo">ResumePlay</h1>
-    <p>
-        Introducing ResumePlay, the useful web application that allows you to seamlessly pick up where you left
-        off on your favorite YouTube audiobooks. Say goodbye to the frustration of losing your play position and
-        hello to an uninterrupted listening experience.
-    </p>
-    <div class="youtube-url">
-        <label for="video-url">Enter YouTube video or playlist URL:</label>
-        <input type="text" id="video-url" placeholder="Enter video or playlist URL"
-               value="https://www.youtube.com/watch?v=BxR3EF690oo">
-        <div id="controls">
-            <button title="load" id="load-button" disabled>LOAD</button>
-            <button title="play" id="play-button" disabled>&#9658;</button>
-            <button title="pause" id="stop-button" disabled>&#9646;&#9646;</button>
-            <div class="toggle-skipping">
-                <label class="switch">
-                    <input id="skip-toggler" type="checkbox" checked="1">
-                    <span class="slider"></span>
-                </label>
-                <span class="label"><strong>Toggle skip protection</strong></span>
-            </div>
-        </div>
-    </div>
-    <p id="stored-playtime">Stored Timestamp:</p>
-    <p id="total-playtime"></p>
-    <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers.
-        I understand that Google places cookies on my computer, is able to see my IP-address and which videos I play,
-        and that this data may be transferred to Google in the USA. This website does no tracking itself.
+<svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-play" viewBox="0 0 16 16"><path class="icon-smooth" d="M4.5 2L14.5 8L4.5 14Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 16 16"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 16 16"><path d="M7 2h2v12H7zM2 7h12v2H2z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 16 16"><path d="M3 3h2v2H3zM5 5h2v2H5zM7 7h2v2H7zM9 9h2v2H9zM11 11h2v2h-2zM11 3h2v2h-2zM9 5h2v2H9zM5 9h2v2H5zM3 11h2v2H3z"/></symbol>
+    <symbol id="i-watch" viewBox="0 0 16 16"><path d="M1 3h14v1H1zM1 11h14v1H1zM1 4h1v7H1zM14 4h1v7h-1zM6 13h4v1H6zM6 6h1v3H6zM7 6h1v1H7zM7 8h1v1H7zM8 7h1v1H8z"/></symbol>
+    <symbol id="i-listen" viewBox="0 0 16 16"><path d="M5 2h6v1H5zM3 3h2v1H3zM11 3h2v1h-2zM2 4h1v4H2zM13 4h1v4h-1zM2 8h4v6H2zM10 8h4v6h-4z"/></symbol>
+    <symbol id="i-logo" viewBox="92 124 328 292"><g fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round">
+    <path d="M158 232C150 160 190 138 256 138C322 138 362 160 354 232"/>
+    <path d="M180 148L164 184M332 148L348 184"/>
+    <circle cx="153" cy="243" r="11"/>
+    <circle cx="358" cy="242" r="12"/>
+    <path d="M157 256L166 284M354 256L346 284"/>
+    <path d="M106 352C102 270 252 264 258 342"/>
+    <path d="M254 342C260 264 410 270 406 352"/>
+    <ellipse cx="187" cy="350" rx="57" ry="52"/>
+    <ellipse cx="325" cy="350" rx="57" ry="52"/>
+    <circle cx="186" cy="350" r="16"/>
+    <circle cx="326" cy="350" r="16"/>
+    </g></symbol>
+    <symbol id="i-fullscreen" viewBox="0 0 16 16"><path d="M2 2h5v2H4v3H2zM9 2h5v5h-2V4H9zM2 9h2v3h3v2H2zM12 9h2v5H9v-2h3z"/></symbol>
+    <symbol id="i-cursor" viewBox="0 0 16 16"><path d="M0 6h2v5H0zM2 5h6v2H2zM8 4h7v3H8zM2 7h7v5H2zM9 8h3v1H9zM9 10h3v1H9zM3 12h7v1H3z"/></symbol>
+</svg>
+
+<header class="topbar">
+    <h1 class="wordmark"><svg class="logo" aria-hidden="true"><use href="#i-logo"/></svg>ResumePlay</h1>
+    <button type="button" class="btn btn-ghost" id="add-toggle" aria-expanded="false" aria-controls="add-panel">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus"/></svg>
+        <span>Add</span>
     </button>
-    <p id="consent-info">
-        My consent is stored for one year and can be withdrawn at any time.
-        Details: <a href="https://lazerbahn.com/datenschutz.html#resumeplay">Data Privacy</a>
+</header>
+
+<main class="layout">
+    <section class="stage" aria-label="Now playing">
+        <form class="panel add-panel" id="add-panel" hidden novalidate>
+            <p class="add-intro" id="add-intro" hidden>
+                Paste a YouTube video or playlist. ResumePlay keeps your place in it, even if you close the tab.
+            </p>
+            <label class="field-label" for="video-url">YouTube video or playlist link</label>
+            <div class="field-row">
+                <input class="field" type="text" id="video-url" inputmode="url" autocomplete="off" spellcheck="false"
+                       placeholder="https://youtu.be/…" aria-describedby="video-url-error">
+                <button type="submit" class="btn btn-primary">Open</button>
+            </div>
+            <p class="field-error" id="video-url-error" hidden></p>
+        </form>
+
+        <div class="player-area" id="player-area">
+            <div class="panel consent" id="consent" hidden>
+                <h2 class="consent-title">Play through YouTube?</h2>
+                <p>
+                    ResumePlay uses YouTube's player. To load it, your browser contacts Google: Google sees your
+                    IP address and what you watch, sets its own cookies, and may transfer this data to the USA.
+                    ResumePlay itself does no tracking.
+                </p>
+                <div class="consent-actions">
+                    <button type="button" class="btn btn-primary" id="consent-button">Allow YouTube</button>
+                    <a href="https://lazerbahn.com/datenschutz.html#resumeplay">Details in the privacy policy</a>
+                </div>
+                <p class="fine">Your choice is stored for one year. You can withdraw it at any time at the bottom of this page.</p>
+            </div>
+            <div class="player-frame" id="player-frame" data-view="watch" hidden>
+                <div id="player"></div>
+                <button type="button" class="btn btn-icon fullscreen-exit" id="fullscreen-exit" aria-label="Exit fullscreen" title="Exit fullscreen">
+                    <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+                </button>
+            </div>
+            <p class="panel player-empty" id="player-empty" hidden>Pick a save file to continue.</p>
+        </div>
+
+        <article class="panel slot-now" id="slot-now" hidden aria-labelledby="now-title">
+            <h2 class="now-title" id="now-title"></h2>
+            <p class="now-meta" id="now-meta"></p>
+            <div class="now-row">
+                <p class="now-time"><span class="visually-hidden">Saved position </span><span id="now-time">0:00:00</span></p>
+                <button type="button" class="btn btn-ghost btn-fullscreen" id="fullscreen-button" aria-label="Fullscreen" title="Fullscreen" disabled hidden>
+                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-fullscreen"/></svg>
+                </button>
+                <button type="button" class="btn btn-play" id="play-toggle" aria-label="Play" disabled>
+                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-play"/></svg>
+                    <span class="btn-play-label" id="play-label" hidden>Continue</span>
+                </button>
+            </div>
+            <div class="now-controls">
+                <div class="option">
+                    <fieldset class="segmented" aria-describedby="view-help">
+                        <legend class="visually-hidden">View</legend>
+                        <input type="radio" name="view" id="view-watch" value="watch" checked>
+                        <label for="view-watch"><svg class="icon" aria-hidden="true"><use href="#i-watch"/></svg>Watch</label>
+                        <input type="radio" name="view" id="view-listen" value="listen">
+                        <label for="view-listen"><svg class="icon" aria-hidden="true"><use href="#i-listen"/></svg>Listen</label>
+                    </fieldset>
+                    <p class="fine" id="view-help">"Watch" shows the video large. "Listen" keeps it small and puts your position first.</p>
+                </div>
+                <div class="option">
+                    <div class="switch-row">
+                        <input type="checkbox" class="switch" id="skip-toggle" role="switch" checked aria-describedby="skip-help">
+                        <label for="skip-toggle">Skip protection</label>
+                    </div>
+                    <p class="fine" id="skip-help">Undoes accidental jumps in the video. Turn it off to skip on purpose.</p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="shelf" aria-labelledby="shelf-title">
+        <div class="shelf-head">
+            <h2 class="shelf-title" id="shelf-title">Save files</h2>
+            <p class="time-played" id="time-played"></p>
+        </div>
+        <ol class="slots" id="slots"></ol>
+    </section>
+</main>
+
+<div class="notice" id="notice" role="status" aria-live="polite" hidden>
+    <p class="notice-text" id="notice-text"></p>
+    <button type="button" class="btn btn-small" id="notice-action" hidden></button>
+    <button type="button" class="btn btn-icon" id="notice-close" aria-label="Dismiss">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+</div>
+
+<footer class="footer">
+    <p>
+        Your save files and time played are stored only in this browser (LocalStorage) and never sent to us.
+        Apart from the one cookie that remembers your YouTube choice, this site sets no cookies and does no tracking
+        beyond the server logs.
     </p>
-</div>
-<div id="youtube-player-container">
-    <div id="player"></div>
-</div>
-<p class="img-desc">
-    Logo image created via Stable Diffusion with the prompt "Logo for a tech website for audio books, vector art,
-    flat design, award-winning, showing headphones, books".<br/><br/>
-    The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
-    <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
-    or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
-    YouTube-URL, the current position and your total listening time, which is required of the proper functioning
-    of the application. This data never leaves your browser.
-    You can withdraw your consent to load code from Google at any time with the "Withdraw Cookie Consent" button.
-    <br/><br/>
-    <a href="https://lazerbahn.com/impressum.html">Imprint</a>
-    <a href="https://lazerbahn.com/datenschutz.html">Data Privacy</a>
-    <button id="withdraw-consent-button" title="Withdraw Cookie Consent">Withdraw Cookie Consent</button>
-</p>
-<script type="text/javascript">
+    <p>Built by Manuel Rülke with the help of AI: the code with ChatGPT and Claude, the app icon with Stable Diffusion.</p>
+    <nav class="footer-links" aria-label="Legal">
+        <a href="https://lazerbahn.com/impressum.html">Imprint</a>
+        <a href="https://lazerbahn.com/datenschutz.html#resumeplay">Privacy</a>
+        <button type="button" class="link-button" id="withdraw-consent-button" hidden>Withdraw YouTube consent</button>
+    </nav>
+</footer>
 
-    function initApplication() {
-        loadDependencies(
-            function () {
-                const loadButton = document.getElementById("load-button");
-                const stopButton = document.getElementById("stop-button");
-                const playButton = document.getElementById("play-button");
-                const videoUrl = document.getElementById("video-url");
-                let player;
-                let interval;
-                let videoSrc = localStorage.getItem('videoSrc');
-
-                // Skip protection: where the video should be, based on the real time
-                // that passed while playing and the playback speed.
-                const SKIP_TOLERANCE = 3; // seconds
-                let trackedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
-                let trackedSince = null; // performance.now() of the last update, null while not playing
-                let trackedRate = 1;
-                let trackedDuration = Infinity;
-
-                // Playlists: which video we're on, so a manual jump to another video can be undone
-                let playlistId = null;
-                let trackedVideoId = localStorage.getItem('currentVideoId');
-                let videoEnded = false;
-                let restoring = false;
-
-                loadButton.addEventListener("click", function () {
-                    const parsed = parseYouTubeUrl(videoUrl.value);
-                    if (!parsed) {
-                        alert('Could not find a YouTube video or playlist in: ' + videoUrl.value);
-                        return;
-                    }
-                    document.getElementById("stop-button").disabled = false;
-                    document.getElementById("play-button").disabled = false;
-                    videoSrc = videoUrl.value;
-                    localStorage.setItem('videoSrc', videoSrc);
-                    localStorage.setItem('currentTime', '0');
-                    localStorage.removeItem('currentVideoId');
-                    trackedTime = 0;
-                    trackedVideoId = parsed.videoId;
-                    updateTimestampDisplay()
-                    play(parsed);
-                });
-
-                stopButton.addEventListener("click", function () {
-                    if (player) {
-                        player.pauseVideo();
-                    }
-                });
-
-                playButton.addEventListener("click", function () {
-                    if (player) {
-                        player.playVideo();
-                    }
-                });
-
-                // Returns {videoId, playlistId} (one of them may be null), or null if the input
-                // contains neither. Accepts watch, youtu.be, shorts, live, embed and playlist URLs,
-                // with or without https://, and bare video IDs.
-                function parseYouTubeUrl(input) {
-                    const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
-                    // at least 10 characters: excludes private lists like WL (watch later) and LL (liked)
-                    const PLAYLIST_ID = /^[A-Za-z0-9_-]{10,}$/;
-
-                    input = input.trim();
-                    if (VIDEO_ID.test(input)) {
-                        return {videoId: input, playlistId: null};
-                    }
-
-                    let url;
-                    try {
-                        url = new URL(/^https?:\/\//i.test(input) ? input : 'https://' + input);
-                    } catch (e) {
-                        return null;
-                    }
-                    const host = url.hostname.replace(/^(www|m|music)\./, '');
-                    const path = url.pathname.split('/').filter(Boolean);
-
-                    let videoId = null;
-                    if (host === 'youtu.be') {
-                        videoId = path[0];
-                    } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
-                        if (path[0] === 'watch') {
-                            videoId = url.searchParams.get('v');
-                        } else if (['shorts', 'live', 'embed', 'v'].includes(path[0]) && path[1] !== 'videoseries') {
-                            videoId = path[1];
-                        }
-                    } else {
-                        return null;
-                    }
-                    let list = url.searchParams.get('list');
-
-                    videoId = VIDEO_ID.test(videoId || '') ? videoId : null;
-                    list = PLAYLIST_ID.test(list || '') ? list : null;
-                    return videoId || list ? {videoId: videoId, playlistId: list} : null;
-                }
-
-                function play(parsed) {
-                    window.YT.ready(function () {
-                        if (player) {
-                            player.destroy();
-                        }
-                        trackedSince = null;
-                        trackedDuration = Infinity;
-                        videoEnded = false;
-                        restoring = false;
-                        playlistId = parsed.playlistId;
-
-                        const options = {
-                            host: 'https://www.youtube-nocookie.com',
-                            events: {
-                                'onReady': onPlayerReady,
-                                'onStateChange': onPlayerStateChange,
-                                'onPlaybackRateChange': onPlaybackRateChange,
-                                'onError': onPlayerError
-                            }
-                        };
-                        // for a playlist this is the video to start at; without one, it starts at the first video
-                        if (trackedVideoId) {
-                            options.videoId = trackedVideoId;
-                        }
-                        if (playlistId) {
-                            options.playerVars = {listType: 'playlist', list: playlistId};
-                        }
-                        player = new YT.Player('player', options);
-                    });
-                }
-
-                function onPlayerReady(event) {
-                    event.target.seekTo(trackedTime, true);
-                    if (interval) clearInterval(interval);
-                    interval = setInterval(savePosition, 2000);
-                }
-
-                function padTime(time) {
-                    if (time < 10) {
-                        return '0' + time;
-                    }
-                    return time;
-                }
-
-                function updateTimestampDisplay() {
-                    let currentTime = localStorage.getItem('currentTime');
-                    let playlistInfo = '';
-                    const list = player && player.getPlaylist && player.getPlaylist();
-                    if (list && list.length) {
-                        playlistInfo = 'Video ' + (player.getPlaylistIndex() + 1) + ' of ' + list.length + ', ';
-                    }
-
-                    const hours = Math.floor(currentTime / 3600);
-                    currentTime -= hours * 3600;
-                    const mins = Math.floor(currentTime / 60);
-                    currentTime -= mins * 60;
-                    const secs = Math.floor(currentTime);
-
-                    document.getElementById("stored-playtime").innerHTML =
-                        'Stored Timestamp: ' + playlistInfo + padTime(hours) + ':' + padTime(mins) + ':' + padTime(secs);
-                }
-
-                function advanceTrackedTime() {
-                    if (trackedSince === null) return;
-                    const now = performance.now();
-                    trackedTime += (now - trackedSince) / 1000 * trackedRate;
-                    addListeningTime((now - trackedSince) / 1000);
-                    trackedSince = now;
-                }
-
-                // Real time spent listening (not video time: an hour at 2x counts as one hour).
-                // Re-read before adding, so several open tabs don't overwrite each other.
-                function addListeningTime(seconds) {
-                    const total = (parseFloat(localStorage.getItem('totalPlaytime')) || 0) + seconds;
-                    localStorage.setItem('totalPlaytime', total);
-                    updateTotalPlaytimeDisplay();
-                }
-
-                function updateTotalPlaytimeDisplay() {
-                    const totalMinutes = Math.floor((parseFloat(localStorage.getItem('totalPlaytime')) || 0) / 60);
-                    const hours = Math.floor(totalMinutes / 60);
-                    document.getElementById("total-playtime").innerHTML =
-                        'Total listening time: ' + (hours ? hours + ' h ' : '') + (totalMinutes % 60) + ' min';
-                }
-
-                function skipProtectionOn() {
-                    return document.getElementById('skip-toggler').checked;
-                }
-
-                function currentVideoId() {
-                    const list = player.getPlaylist();
-                    return list ? list[player.getPlaylistIndex()] : trackedVideoId;
-                }
-
-                // Returns true if the player is on the video we expect (again).
-                function handleVideoChange() {
-                    const current = currentVideoId();
-                    if (!current || current === trackedVideoId) {
-                        restoring = false;
-                        return true;
-                    }
-                    if (restoring) {
-                        return false;
-                    }
-                    const index = player.getPlaylist().indexOf(trackedVideoId);
-                    const finished = videoEnded || trackedTime > trackedDuration - SKIP_TOLERANCE;
-                    if (finished || index < 0 || !skipProtectionOn()) {
-                        // the playlist moved on by itself (or the user may switch videos): follow it
-                        trackedVideoId = current;
-                        trackedTime = player.getCurrentTime();
-                        trackedDuration = Infinity;
-                        videoEnded = false;
-                        localStorage.setItem('currentVideoId', current);
-                        localStorage.setItem('currentTime', trackedTime);
-                        return true;
-                    }
-                    // jumped to another video by hand: go back to where we were
-                    restoring = true;
-                    trackedSince = null;
-                    player.loadPlaylist({list: playlistId, listType: 'playlist', index: index, startSeconds: trackedTime});
-                    return false;
-                }
-
-                function onPlayerStateChange(event) {
-                    if (event.data === YT.PlayerState.ENDED) {
-                        videoEnded = true;
-                    }
-                    if (event.data === YT.PlayerState.PLAYING) {
-                        if (!handleVideoChange()) return;
-                        if (trackedSince === null) trackedSince = performance.now();
-                        trackedRate = player.getPlaybackRate();
-                    } else {
-                        // keep the expected position up to the moment playing stopped,
-                        // so pauses and buffering don't look like a skip
-                        advanceTrackedTime();
-                        trackedSince = null;
-                    }
-                }
-
-                function onPlayerError(event) {
-                    const reasons = {
-                        2: 'the video or playlist ID is invalid',
-                        5: 'the video can\'t be played in the HTML5 player',
-                        100: 'the video was not found or is private',
-                        101: 'the owner doesn\'t allow playing it on other websites',
-                        150: 'the owner doesn\'t allow playing it on other websites'
-                    };
-                    // in a playlist, moving on from a broken video must not count as a skip
-                    videoEnded = true;
-                    alert('YouTube can\'t play this: ' + (reasons[event.data] || 'error ' + event.data));
-                }
-
-                function onPlaybackRateChange(event) {
-                    advanceTrackedTime();
-                    trackedRate = event.data;
-                }
-
-                function savePosition() {
-                    if (!player || player.getPlayerState() !== YT.PlayerState.PLAYING) return;
-
-                    if (!handleVideoChange()) return;
-
-                    advanceTrackedTime();
-                    trackedDuration = player.getDuration() || Infinity;
-                    let playerTime = player.getCurrentTime();
-                    if (skipProtectionOn() && trackedSince !== null
-                        && Math.abs(playerTime - trackedTime) > SKIP_TOLERANCE) {
-                        playerTime = trackedTime;
-                        player.seekTo(playerTime, true);
-                    }
-                    trackedTime = playerTime;
-                    localStorage.setItem('currentTime', playerTime);
-                    updateTimestampDisplay();
-                }
-
-                updateTotalPlaytimeDisplay();
-
-                const storedSrc = localStorage.getItem('videoSrc');
-                const storedParsed = storedSrc && parseYouTubeUrl(storedSrc);
-                if (storedParsed) {
-                    videoUrl.value = storedSrc;
-                    if (!trackedVideoId) trackedVideoId = storedParsed.videoId;
-                    updateTimestampDisplay();
-                    play(storedParsed);
-                }
-            }
-        );
-    }
-
-    function loadDependencies(callback) {
-        const script = document.createElement('script');
-        script.onload = callback;
-        script.src = 'https://www.youtube.com/player_api';
-        document.head.appendChild(script);
-    }
-
-    // bump when the consent text changes, so everyone is asked again
-    const CONSENT_VERSION = 'v2';
-
-    document.getElementById("consent-button").addEventListener("click", function () {
-        document.cookie = "consent=" + CONSENT_VERSION + "; max-age=" + (365 * 24 * 60 * 60);
-        document.getElementById("consent-button").style.display = "none";
-        document.getElementById("consent-info").style.display = "none";
-        document.getElementById("withdraw-consent-button").style.display = "inline-block";
-        document.getElementById("youtube-player-container").style.display = "block";
-        document.getElementById("load-button").disabled = false;
-        initApplication();
-    });
-    document.getElementById("withdraw-consent-button").addEventListener("click", function () {
-        document.cookie = "consent=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        // the Google code is already running, only a reload gets rid of it
-        location.reload();
-    });
-    if (document.cookie.indexOf("consent=" + CONSENT_VERSION) >= 0) {
-        document.getElementById("youtube-player-container").style.display = "block";
-        document.getElementById("load-button").disabled = false;
-        document.getElementById("stop-button").disabled = false;
-        document.getElementById("play-button").disabled = false;
-        document.getElementById("consent-button").style.display = "none";
-        document.getElementById("consent-info").style.display = "none";
-        document.getElementById("withdraw-consent-button").style.display = "inline-block";
-        initApplication();
-    }
-</script>
+<script src="app.js?id=405"></script>
 </body>
 </html>
-

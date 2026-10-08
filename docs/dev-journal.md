@@ -155,3 +155,8 @@ in that case. Now there's an error message telling you why.
 The page now shows the total listening time ("Total listening time: 3 h 25
 min"). It only counts real time while something is playing, so pauses don't count and an hour at
 2× is one hour. It's stored in LocalStorage and survives reloads and new videos.
+
+I let Claude rebuild the interface and add some interesting features:
+- history of videos
+- playlists
+- new retro-design
