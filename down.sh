@@ -2,7 +2,6 @@
 set -e
 cd "$(dirname "$0")"
 
-echo "Stop :"
-docker stop resumeplay_web
-echo "Remove :"
-docker rm resumeplay_web
+# -f stops a running container first and doesn't fail if there is none
+docker rm -f resumeplay_web >/dev/null
+echo "Container resumeplay_web stopped and removed."

@@ -2,4 +2,4 @@
 set -e
 cd "$(dirname "$0")"
 
-docker exec -it resumeplay_web bash
+docker exec -w /app -it resumeplay_web bash

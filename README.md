@@ -26,7 +26,7 @@ Yet, I was able to turn the Ai output into something I liked with relatively lit
 
 It's completely build on Docker. For simplicity, all Docker interactivity is encapsulated in shell scripts:
 
-    ./up.sh         # build container and start it (--rebuild to re-create it) 
+    ./up.sh         # start container (--rebuild to re-create it with a fresh image)
     ./down.sh       # stop container and delete it
     ./shell.sh      # open shell into container
 
