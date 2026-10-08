@@ -19,8 +19,8 @@
         hello to an uninterrupted listening experience.
     </p>
     <div class="youtube-url">
-        <label for="video-url">Enter YouTube URL:</label>
-        <input type="text" id="video-url" placeholder="Enter video URL"
+        <label for="video-url">Enter YouTube video or playlist URL:</label>
+        <input type="text" id="video-url" placeholder="Enter video or playlist URL"
                value="https://www.youtube.com/watch?v=BxR3EF690oo">
         <div id="controls">
             <button title="load" id="load-button" disabled>LOAD</button>
@@ -80,20 +80,30 @@
                 let trackedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
                 let trackedSince = null; // performance.now() of the last update, null while not playing
                 let trackedRate = 1;
+                let trackedDuration = Infinity;
+
+                // Playlists: which video we're on, so a manual jump to another video can be undone
+                let playlistId = null;
+                let trackedVideoId = localStorage.getItem('currentVideoId');
+                let videoEnded = false;
+                let restoring = false;
 
                 loadButton.addEventListener("click", function () {
-                    videoSrc = videoUrl.value;
-                    if (!videoSrc) {
-                        alert('Please Enter Video URL')
-                    } else {
-                        document.getElementById("stop-button").disabled = false;
-                        document.getElementById("play-button").disabled = false;
-                        localStorage.setItem('videoSrc', videoSrc);
-                        localStorage.setItem('currentTime', '0');
-                        trackedTime = 0;
-                        updateTimestampDisplay()
-                        play(videoSrc);
+                    const parsed = parseYouTubeUrl(videoUrl.value);
+                    if (!parsed) {
+                        alert('Could not find a YouTube video or playlist in: ' + videoUrl.value);
+                        return;
                     }
+                    document.getElementById("stop-button").disabled = false;
+                    document.getElementById("play-button").disabled = false;
+                    videoSrc = videoUrl.value;
+                    localStorage.setItem('videoSrc', videoSrc);
+                    localStorage.setItem('currentTime', '0');
+                    localStorage.removeItem('currentVideoId');
+                    trackedTime = 0;
+                    trackedVideoId = parsed.videoId;
+                    updateTimestampDisplay()
+                    play(parsed);
                 });
 
                 stopButton.addEventListener("click", function () {
@@ -108,33 +118,75 @@
                     }
                 });
 
-                function play(url) {
-                    if (!url) {
-                        alert('No URL, no play!');
-                        return;
+                // Returns {videoId, playlistId} (one of them may be null), or null if the input
+                // contains neither. Accepts watch, youtu.be, shorts, live, embed and playlist URLs,
+                // with or without https://, and bare video IDs.
+                function parseYouTubeUrl(input) {
+                    const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
+                    // at least 10 characters: excludes private lists like WL (watch later) and LL (liked)
+                    const PLAYLIST_ID = /^[A-Za-z0-9_-]{10,}$/;
+
+                    input = input.trim();
+                    if (VIDEO_ID.test(input)) {
+                        return {videoId: input, playlistId: null};
                     }
-                    let videoId = url.split('v=')[1];
-                    if (videoId.indexOf('&')) {
-                        videoId = videoId.split('&')[0];
+
+                    let url;
+                    try {
+                        url = new URL(/^https?:\/\//i.test(input) ? input : 'https://' + input);
+                    } catch (e) {
+                        return null;
                     }
-                    if (!videoId) {
-                        alert('Could not extract video ID form URL: ' + url);
-                        return;
+                    const host = url.hostname.replace(/^(www|m|music)\./, '');
+                    const path = url.pathname.split('/').filter(Boolean);
+
+                    let videoId = null;
+                    if (host === 'youtu.be') {
+                        videoId = path[0];
+                    } else if (host === 'youtube.com' || host === 'youtube-nocookie.com') {
+                        if (path[0] === 'watch') {
+                            videoId = url.searchParams.get('v');
+                        } else if (['shorts', 'live', 'embed', 'v'].includes(path[0]) && path[1] !== 'videoseries') {
+                            videoId = path[1];
+                        }
+                    } else {
+                        return null;
                     }
+                    let list = url.searchParams.get('list');
+
+                    videoId = VIDEO_ID.test(videoId || '') ? videoId : null;
+                    list = PLAYLIST_ID.test(list || '') ? list : null;
+                    return videoId || list ? {videoId: videoId, playlistId: list} : null;
+                }
+
+                function play(parsed) {
                     window.YT.ready(function () {
                         if (player) {
                             player.destroy();
                         }
                         trackedSince = null;
-                        player = new YT.Player('player', {
+                        trackedDuration = Infinity;
+                        videoEnded = false;
+                        restoring = false;
+                        playlistId = parsed.playlistId;
+
+                        const options = {
                             host: 'https://www.youtube-nocookie.com',
-                            videoId: videoId,
                             events: {
                                 'onReady': onPlayerReady,
                                 'onStateChange': onPlayerStateChange,
-                                'onPlaybackRateChange': onPlaybackRateChange
+                                'onPlaybackRateChange': onPlaybackRateChange,
+                                'onError': onPlayerError
                             }
-                        });
+                        };
+                        // for a playlist this is the video to start at; without one, it starts at the first video
+                        if (trackedVideoId) {
+                            options.videoId = trackedVideoId;
+                        }
+                        if (playlistId) {
+                            options.playerVars = {listType: 'playlist', list: playlistId};
+                        }
+                        player = new YT.Player('player', options);
                     });
                 }
 
@@ -153,6 +205,11 @@
 
                 function updateTimestampDisplay() {
                     let currentTime = localStorage.getItem('currentTime');
+                    let playlistInfo = '';
+                    const list = player && player.getPlaylist && player.getPlaylist();
+                    if (list && list.length) {
+                        playlistInfo = 'Video ' + (player.getPlaylistIndex() + 1) + ' of ' + list.length + ', ';
+                    }
 
                     const hours = Math.floor(currentTime / 3600);
                     currentTime -= hours * 3600;
@@ -161,7 +218,7 @@
                     const secs = Math.floor(currentTime);
 
                     document.getElementById("stored-playtime").innerHTML =
-                        'Stored Timestamp: ' + padTime(hours) + ':' + padTime(mins) + ':' + padTime(secs);
+                        'Stored Timestamp: ' + playlistInfo + padTime(hours) + ':' + padTime(mins) + ':' + padTime(secs);
                 }
 
                 function advanceTrackedTime() {
@@ -171,8 +228,50 @@
                     trackedSince = now;
                 }
 
+                function skipProtectionOn() {
+                    return document.getElementById('skip-toggler').checked;
+                }
+
+                function currentVideoId() {
+                    const list = player.getPlaylist();
+                    return list ? list[player.getPlaylistIndex()] : trackedVideoId;
+                }
+
+                // Returns true if the player is on the video we expect (again).
+                function handleVideoChange() {
+                    const current = currentVideoId();
+                    if (!current || current === trackedVideoId) {
+                        restoring = false;
+                        return true;
+                    }
+                    if (restoring) {
+                        return false;
+                    }
+                    const index = player.getPlaylist().indexOf(trackedVideoId);
+                    const finished = videoEnded || trackedTime > trackedDuration - SKIP_TOLERANCE;
+                    if (finished || index < 0 || !skipProtectionOn()) {
+                        // the playlist moved on by itself (or the user may switch videos): follow it
+                        trackedVideoId = current;
+                        trackedTime = player.getCurrentTime();
+                        trackedDuration = Infinity;
+                        videoEnded = false;
+                        localStorage.setItem('currentVideoId', current);
+                        localStorage.setItem('currentTime', trackedTime);
+                        return true;
+                    }
+                    // jumped to another video by hand: go back to where we were
+                    restoring = true;
+                    trackedSince = null;
+                    player.loadPlaylist({list: playlistId, listType: 'playlist', index: index, startSeconds: trackedTime});
+                    return false;
+                }
+
                 function onPlayerStateChange(event) {
+                    if (event.data === YT.PlayerState.ENDED) {
+                        videoEnded = true;
+                    }
                     if (event.data === YT.PlayerState.PLAYING) {
+                        if (!handleVideoChange()) return;
                         if (trackedSince === null) trackedSince = performance.now();
                         trackedRate = player.getPlaybackRate();
                     } else {
@@ -183,6 +282,19 @@
                     }
                 }
 
+                function onPlayerError(event) {
+                    const reasons = {
+                        2: 'the video or playlist ID is invalid',
+                        5: 'the video can\'t be played in the HTML5 player',
+                        100: 'the video was not found or is private',
+                        101: 'the owner doesn\'t allow playing it on other websites',
+                        150: 'the owner doesn\'t allow playing it on other websites'
+                    };
+                    // in a playlist, moving on from a broken video must not count as a skip
+                    videoEnded = true;
+                    alert('YouTube can\'t play this: ' + (reasons[event.data] || 'error ' + event.data));
+                }
+
                 function onPlaybackRateChange(event) {
                     advanceTrackedTime();
                     trackedRate = event.data;
@@ -191,9 +303,12 @@
                 function savePosition() {
                     if (!player || player.getPlayerState() !== YT.PlayerState.PLAYING) return;
 
+                    if (!handleVideoChange()) return;
+
                     advanceTrackedTime();
+                    trackedDuration = player.getDuration() || Infinity;
                     let playerTime = player.getCurrentTime();
-                    if (document.getElementById('skip-toggler').checked && trackedSince !== null
+                    if (skipProtectionOn() && trackedSince !== null
                         && Math.abs(playerTime - trackedTime) > SKIP_TOLERANCE) {
                         playerTime = trackedTime;
                         player.seekTo(playerTime, true);
@@ -203,11 +318,13 @@
                     updateTimestampDisplay();
                 }
 
-                if (localStorage.getItem('videoSrc')) {
-                    const storedSrc = localStorage.getItem('videoSrc');
+                const storedSrc = localStorage.getItem('videoSrc');
+                const storedParsed = storedSrc && parseYouTubeUrl(storedSrc);
+                if (storedParsed) {
                     videoUrl.value = storedSrc;
+                    if (!trackedVideoId) trackedVideoId = storedParsed.videoId;
                     updateTimestampDisplay();
-                    play(storedSrc);
+                    play(storedParsed);
                 }
             }
         );

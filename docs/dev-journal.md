@@ -141,3 +141,13 @@ video *should* be from the real time that passed and the playback speed. When pl
 (pause, buffering), the expected position is moved forward to that moment, so stalls don't count
 as skips. Tested in headless Chrome at 1×, 1.5× and 2×, with jumps forward while playing and
 while paused, and with the toggle off.
+
+Then I rewrote the URL parsing and added playlists. It now understands pretty much every
+YouTube link: `youtu.be`, shorts, live, embed, mobile and music links, links without `https://`,
+and bare video IDs. Playlists work too. A link with both a video and a playlist starts the
+playlist at that video, and after a reload it continues with the right video at the right time.
+Skip protection lets the playlist move on by itself when a video ends, but an accidental "next"
+gets undone. The display shows "Video 3 of 12".
+
+I also learned that some playlist owners block embedding. Until now the app just stayed blank
+in that case. Now there's an error message telling you why.
