@@ -82,6 +82,17 @@ input {
     color: #fff;
 }
 
+#withdraw-consent-button {
+    display: none; /* only shown once consent was given */
+    background: none;
+    border: 1px solid #777;
+    color: #ccc;
+    padding: 5px 10px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
 .img-desc {
     color: #777;
     font-size: 1rem;
@@ -171,4 +182,9 @@ input:checked + .slider:before {
 
 .slider.round:before {
     border-radius: 50%;
+}
+
+#consent-info {
+    margin: 0 40px;
+    color: #ccc;
 }

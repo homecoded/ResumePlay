@@ -98,8 +98,39 @@ I did this on a branch and merged it into master.
 - Short links (`youtu.be/…`) and shorts don't work, and the page errors before the
   "could not extract video ID" alert can show.
 - The disabled style on the LOAD button got lost when I renamed it.
-- There's no way to withdraw consent once it's given.
+- ~~There's no way to withdraw consent once it's given.~~ (done 2026-10-08)
 - `up.sh --rebuild` still expects the old Dockerfile.
 - It only remembers one video. Several videos would be nice.
 - Clean up unused files: the old background image and its prompt, the prototype, the Apache
   config, and the cube.
+
+---
+
+## 2026-10-08
+
+Back after a long break. I wrote this journal down from memory so I remember how the project
+came about, and went through the open bugs.
+
+I fixed the GDPR gap first. There's now a **"Withdraw Cookie Consent"** button in the footer next to
+Imprint and Data Privacy. It only shows once consent has been given. The privacy note mentions the button.
+
+The cookies Google set itself can't be deleted from my site, since they belong to Google's
+domain. That belongs in the privacy policy on lazerbahn.com.
+
+I tested it in headless Chrome: fresh visit, consent, reload, withdraw. All good.
+
+New bug spotted on the way: when you give consent for the first time and a video is already
+saved, it loads, but play and pause stay disabled until you hit LOAD again. LOAD then resets
+the position to 0.
+
+Then I did a privacy round, while I was at it:
+
+- The privacy policy on lazerbahn.com now has a ResumePlay section: what's stored in the browser,
+  YouTube and Google's cookies, data going to the USA (EU-US Data Privacy Framework), and how to
+  withdraw consent. It also has a server log section that was missing entirely. Logs are deleted
+  after 14 days at the latest.
+- The consent text now says that data can go to Google in the USA, and links to the policy.
+- The consent cookie now lasts one year instead of "until 9999". The value has a version, so
+  when the text changes everyone gets asked again. That happened today, since the text changed.
+- YouTube now runs in privacy-enhanced mode (`youtube-nocookie.com`). Playback and saving still
+  work.

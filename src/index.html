@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <title>ResumePlay</title>
-    <link rel="stylesheet" type="text/css" href="style.css?id=374">
+    <link rel="stylesheet" type="text/css" href="style.css?id=377">
     <link rel="manifest" href="manifest.json">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="icon" type="image/png" sizes="16x16" href="icon-16x16.png">
@@ -37,13 +37,30 @@
     </div>
     <p id="stored-playtime">Stored Timestamp:</p>
     <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers.
-        I understand that Google places cookies on my computer and is able to see my IP-address while this website
-        downloads the code. This website does no tracking itself.
+        I understand that Google places cookies on my computer, is able to see my IP-address and which videos I play,
+        and that this data may be transferred to Google in the USA. This website does no tracking itself.
     </button>
+    <p id="consent-info">
+        My consent is stored for one year and can be withdrawn at any time.
+        Details: <a href="https://lazerbahn.com/datenschutz.html#resumeplay">Data Privacy</a>
+    </p>
 </div>
 <div id="youtube-player-container">
     <div id="player"></div>
 </div>
+<p class="img-desc">
+    Logo image created via Stable Diffusion with the prompt "Logo for a tech website for audio books, vector art,
+    flat design, award-winning, showing headphones, books".<br/><br/>
+    The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
+    <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
+    or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
+    YouTube-URL and a timestamp, which is required of the proper functioning of the application.
+    You can withdraw your consent to load code from Google at any time with the "Withdraw Cookie Consent" button.
+    <br/><br/>
+    <a href="https://lazerbahn.com/impressum.html">Imprint</a>
+    <a href="https://lazerbahn.com/datenschutz.html">Data Privacy</a>
+    <button id="withdraw-consent-button" title="Withdraw Cookie Consent">Withdraw Cookie Consent</button>
+</p>
 <script type="text/javascript">
 
     function initApplication() {
@@ -101,6 +118,7 @@
                             player.destroy();
                         }
                         player = new YT.Player('player', {
+                            host: 'https://www.youtube-nocookie.com',
                             videoId: videoId,
                             events: {
                                 'onReady': onPlayerReady,
@@ -169,33 +187,34 @@
         document.head.appendChild(script);
     }
 
+    // bump when the consent text changes, so everyone is asked again
+    const CONSENT_VERSION = 'v2';
+
     document.getElementById("consent-button").addEventListener("click", function () {
-        document.cookie = "consent=true; expires=Fri, 31 Dec 9999 23:59:59 GMT";
+        document.cookie = "consent=" + CONSENT_VERSION + "; max-age=" + (365 * 24 * 60 * 60);
         document.getElementById("consent-button").style.display = "none";
+        document.getElementById("consent-info").style.display = "none";
+        document.getElementById("withdraw-consent-button").style.display = "inline-block";
         document.getElementById("youtube-player-container").style.display = "block";
         document.getElementById("load-button").disabled = false;
         initApplication();
     });
-    if (document.cookie.indexOf("consent=true") >= 0) {
+    document.getElementById("withdraw-consent-button").addEventListener("click", function () {
+        document.cookie = "consent=; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        // the Google code is already running, only a reload gets rid of it
+        location.reload();
+    });
+    if (document.cookie.indexOf("consent=" + CONSENT_VERSION) >= 0) {
         document.getElementById("youtube-player-container").style.display = "block";
         document.getElementById("load-button").disabled = false;
         document.getElementById("stop-button").disabled = false;
         document.getElementById("play-button").disabled = false;
         document.getElementById("consent-button").style.display = "none";
+        document.getElementById("consent-info").style.display = "none";
+        document.getElementById("withdraw-consent-button").style.display = "inline-block";
         initApplication();
     }
 </script>
-<p class="img-desc">
-    Logo image created via Stable Diffusion with the prompt "Logo for a tech website for audio books, vector art,
-    flat design, award-winning, showing headphones, books".<br/><br/>
-    The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
-    <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
-    or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
-    YouTube-URL and a timestamp, which is required of the proper functioning of the application.
-    <br/><br/>
-    <a href="https://lazerbahn.com/impressum.html">Imprint</a>
-    <a href="https://lazerbahn.com/datenschutz.html">Data Privacy</a>
-</p>
 </body>
 </html>
 
