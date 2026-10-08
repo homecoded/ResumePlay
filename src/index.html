@@ -74,6 +74,13 @@
                 let interval;
                 let videoSrc = localStorage.getItem('videoSrc');
 
+                // Skip protection: where the video should be, based on the real time
+                // that passed while playing and the playback speed.
+                const SKIP_TOLERANCE = 3; // seconds
+                let trackedTime = parseFloat(localStorage.getItem('currentTime')) || 0;
+                let trackedSince = null; // performance.now() of the last update, null while not playing
+                let trackedRate = 1;
+
                 loadButton.addEventListener("click", function () {
                     videoSrc = videoUrl.value;
                     if (!videoSrc) {
@@ -83,6 +90,7 @@
                         document.getElementById("play-button").disabled = false;
                         localStorage.setItem('videoSrc', videoSrc);
                         localStorage.setItem('currentTime', '0');
+                        trackedTime = 0;
                         updateTimestampDisplay()
                         play(videoSrc);
                     }
@@ -117,19 +125,23 @@
                         if (player) {
                             player.destroy();
                         }
+                        trackedSince = null;
                         player = new YT.Player('player', {
                             host: 'https://www.youtube-nocookie.com',
                             videoId: videoId,
                             events: {
                                 'onReady': onPlayerReady,
-                                'onStateChange': onPlayerStateChange
+                                'onStateChange': onPlayerStateChange,
+                                'onPlaybackRateChange': onPlaybackRateChange
                             }
                         });
                     });
                 }
 
                 function onPlayerReady(event) {
-                    event.target.seekTo(localStorage.getItem('currentTime'), true);
+                    event.target.seekTo(trackedTime, true);
+                    if (interval) clearInterval(interval);
+                    interval = setInterval(savePosition, 2000);
                 }
 
                 function padTime(time) {
@@ -152,22 +164,43 @@
                         'Stored Timestamp: ' + padTime(hours) + ':' + padTime(mins) + ':' + padTime(secs);
                 }
 
+                function advanceTrackedTime() {
+                    if (trackedSince === null) return;
+                    const now = performance.now();
+                    trackedTime += (now - trackedSince) / 1000 * trackedRate;
+                    trackedSince = now;
+                }
+
                 function onPlayerStateChange(event) {
-                    if (interval) clearInterval(interval);
-                    interval = setInterval(function () {
-                        if (player && player.getCurrentTime() > 0 && player.getPlayerState() === 1) {
-                            let currentTime = localStorage.getItem('currentTime');
-                            let playerTime = player.getCurrentTime();
-                            if (document.getElementById('skip-toggler').checked) {
-                                if (Math.abs(playerTime - currentTime) > 2.5) {
-                                    playerTime = currentTime;
-                                    player.seekTo(playerTime, true);
-                                }
-                            }
-                            localStorage.setItem('currentTime', playerTime);
-                            updateTimestampDisplay();
-                        }
-                    }, 2000);
+                    if (event.data === YT.PlayerState.PLAYING) {
+                        if (trackedSince === null) trackedSince = performance.now();
+                        trackedRate = player.getPlaybackRate();
+                    } else {
+                        // keep the expected position up to the moment playing stopped,
+                        // so pauses and buffering don't look like a skip
+                        advanceTrackedTime();
+                        trackedSince = null;
+                    }
+                }
+
+                function onPlaybackRateChange(event) {
+                    advanceTrackedTime();
+                    trackedRate = event.data;
+                }
+
+                function savePosition() {
+                    if (!player || player.getPlayerState() !== YT.PlayerState.PLAYING) return;
+
+                    advanceTrackedTime();
+                    let playerTime = player.getCurrentTime();
+                    if (document.getElementById('skip-toggler').checked && trackedSince !== null
+                        && Math.abs(playerTime - trackedTime) > SKIP_TOLERANCE) {
+                        playerTime = trackedTime;
+                        player.seekTo(playerTime, true);
+                    }
+                    trackedTime = playerTime;
+                    localStorage.setItem('currentTime', playerTime);
+                    updateTimestampDisplay();
                 }
 
                 if (localStorage.getItem('videoSrc')) {

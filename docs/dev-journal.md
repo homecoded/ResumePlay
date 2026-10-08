@@ -134,3 +134,10 @@ Then I did a privacy round, while I was at it:
   when the text changes everyone gets asked again. That happened today, since the text changed.
 - YouTube now runs in privacy-enhanced mode (`youtube-nocookie.com`). Playback and saving still
   work.
+
+Fixed the skip-protection bug. It assumed the video moves about 2 seconds per check, so at 1.5×
+it jumped back every 2 seconds. At 2× it actually went backwards. Now it works out where the
+video *should* be from the real time that passed and the playback speed. When playback stops
+(pause, buffering), the expected position is moved forward to that moment, so stalls don't count
+as skips. Tested in headless Chrome at 1×, 1.5× and 2×, with jumps forward while playing and
+while paused, and with the toggle off.
