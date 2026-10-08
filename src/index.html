@@ -36,6 +36,7 @@
         </div>
     </div>
     <p id="stored-playtime">Stored Timestamp:</p>
+    <p id="total-playtime"></p>
     <button id="consent-button">CLICK ME: For the webapp to work I allow this website to load code from Google servers.
         I understand that Google places cookies on my computer, is able to see my IP-address and which videos I play,
         and that this data may be transferred to Google in the USA. This website does no tracking itself.
@@ -54,7 +55,8 @@
     The code for this website was mostly created by ChatGPT and was curated and polished by Manuel Rülke.<br/><br/>
     <strong>Data protection:</strong> This website does not set cookies (except to store consent to load youtube)
     or does any tracking beyond what's in the server logs. It does use LocalStorage in your browser to save a
-    YouTube-URL and a timestamp, which is required of the proper functioning of the application.
+    YouTube-URL, the current position and your total listening time, which is required of the proper functioning
+    of the application. This data never leaves your browser.
     You can withdraw your consent to load code from Google at any time with the "Withdraw Cookie Consent" button.
     <br/><br/>
     <a href="https://lazerbahn.com/impressum.html">Imprint</a>
@@ -225,7 +227,23 @@
                     if (trackedSince === null) return;
                     const now = performance.now();
                     trackedTime += (now - trackedSince) / 1000 * trackedRate;
+                    addListeningTime((now - trackedSince) / 1000);
                     trackedSince = now;
+                }
+
+                // Real time spent listening (not video time: an hour at 2x counts as one hour).
+                // Re-read before adding, so several open tabs don't overwrite each other.
+                function addListeningTime(seconds) {
+                    const total = (parseFloat(localStorage.getItem('totalPlaytime')) || 0) + seconds;
+                    localStorage.setItem('totalPlaytime', total);
+                    updateTotalPlaytimeDisplay();
+                }
+
+                function updateTotalPlaytimeDisplay() {
+                    const totalMinutes = Math.floor((parseFloat(localStorage.getItem('totalPlaytime')) || 0) / 60);
+                    const hours = Math.floor(totalMinutes / 60);
+                    document.getElementById("total-playtime").innerHTML =
+                        'Total listening time: ' + (hours ? hours + ' h ' : '') + (totalMinutes % 60) + ' min';
                 }
 
                 function skipProtectionOn() {
@@ -317,6 +335,8 @@
                     localStorage.setItem('currentTime', playerTime);
                     updateTimestampDisplay();
                 }
+
+                updateTotalPlaytimeDisplay();
 
                 const storedSrc = localStorage.getItem('videoSrc');
                 const storedParsed = storedSrc && parseYouTubeUrl(storedSrc);
