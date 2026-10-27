@@ -4,7 +4,10 @@
     // bump when the consent text changes, so everyone is asked again
     const CONSENT_VERSION = 'v2';
     const SKIP_TOLERANCE = 3; // seconds
+    // this close to the end, moving to the next episode counts as finishing, not as a skip
+    const END_TOLERANCE = 10; // seconds
     const SAVE_INTERVAL = 2000;
+    const RESTORE_TIMEOUT = 10000; // give up going back to an episode that doesn't come back
 
     const $ = function (id) {
         return document.getElementById(id);
@@ -194,7 +197,8 @@
         if (noticeAction) $('notice-action').textContent = noticeAction.label;
         $('notice').hidden = false;
         clearTimeout(noticeTimer);
-        if (options.tone !== 'error') {
+        // sticky notices stay until dismissed, so an undone skip can't go unnoticed
+        if (options.tone !== 'error' && !options.sticky) {
             noticeTimer = setTimeout(hideNotice, options.action ? 10000 : 6000);
         }
     }
@@ -228,6 +232,7 @@
     let trackedVideoId = null;
     let videoEnded = false;
     let restoring = false;
+    let restoreDeadline = 0;
     let skipTarget = null; // what the last undone jump wanted, for "Keep new position"
 
     function activeSlot() {
@@ -554,12 +559,17 @@
     // Real time spent watching or listening (an hour at 2x counts as one hour).
     // Re-read before adding, so several open tabs don't overwrite each other.
     function addListeningTime(seconds) {
-        const total = (parseFloat(localStorage.getItem('totalPlaytime')) || 0) + seconds;
-        localStorage.setItem('totalPlaytime', total);
+        const total = (parseFloat(load('totalPlaytime', 0)) || 0) + seconds;
+        store('totalPlaytime', total);
         renderTimePlayed();
     }
 
     function currentVideoId() {
+        // getVideoData() isn't officially documented, but it knows what's actually playing.
+        // The playlist index can point at the wrong entry, e.g. when the playlist contains
+        // private or deleted videos.
+        const data = player.getVideoData ? player.getVideoData() : null;
+        if (data && data.video_id) return data.video_id;
         const list = player.getPlaylist();
         return list ? list[player.getPlaylistIndex()] : trackedVideoId;
     }
@@ -572,11 +582,17 @@
             return true;
         }
         if (restoring) {
-            return false;
+            if (!videoEnded && performance.now() < restoreDeadline) return false;
+            // the old episode never came back (removed, unavailable, playlist changed):
+            // stay where YouTube is, otherwise nothing gets saved anymore
+            restoring = false;
+            followVideo(current, player.getCurrentTime());
+            if (trackedSince === null) trackedSince = performance.now();
+            return true;
         }
         const list = player.getPlaylist() || [];
         const index = list.indexOf(trackedVideoId);
-        const finished = videoEnded || trackedTime > trackedDuration - SKIP_TOLERANCE;
+        const finished = videoEnded || trackedTime > trackedDuration - END_TOLERANCE;
         if (!trackedVideoId || finished || index < 0 || !skipProtectionOn()) {
             // the playlist moved on by itself (or the user may switch videos): follow it
             followVideo(current, player.getCurrentTime());
@@ -587,9 +603,11 @@
         skipTarget = {videoId: current, index: list.indexOf(current)};
         showNotice('Went back to episode ' + (index + 1) + ' at', {
             time: trackedTime,
+            sticky: true,
             action: {label: 'Keep new episode', run: keepSkipTarget}
         });
         restoring = true;
+        restoreDeadline = performance.now() + RESTORE_TIMEOUT;
         trackedSince = null;
         player.loadPlaylist({list: slot.playlistId, listType: 'playlist', index: index, startSeconds: trackedTime});
         return false;
@@ -671,6 +689,7 @@
             skipTarget = {time: playerTime};
             showNotice('Jumped back to', {
                 time: trackedTime,
+                sticky: true,
                 action: {label: 'Keep new position', run: keepSkipTarget}
             });
             playerTime = trackedTime;
