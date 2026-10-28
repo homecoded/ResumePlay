@@ -377,13 +377,13 @@
         out.appendChild(value);
     }
 
-    // Before playback starts on a saved position, the button says "Continue"
+    // Before playback starts on a saved position, the clock says "Continue at".
+    // The button keeps its size, so nothing around it moves.
     function setPlayToggle(playing) {
         const button = $('play-toggle');
         const slot = activeSlot();
         const resume = !playing && !started && !!slot && slot.time > 5;
-        button.classList.toggle('is-continue', resume);
-        $('play-label').hidden = !resume;
+        $('now-time-label').textContent = resume ? 'Continue at' : playing ? 'Playing' : started ? 'Paused at' : 'Position';
         button.setAttribute('aria-label', playing ? 'Pause' : resume ? 'Continue at ' + formatTime(slot.time) : 'Play');
         button.querySelector('use').setAttribute('href', playing ? '#i-pause' : '#i-play');
     }

@@ -381,7 +381,7 @@ a:hover {
     color: var(--ink-soft);
 }
 
-/* wraps the play button below the clock when a long position doesn't leave room */
+/* the buttons wrap below the clock together when a long position doesn't leave room */
 .now-row {
     display: flex;
     flex-wrap: wrap;
@@ -399,6 +399,22 @@ a:hover {
     letter-spacing: 0.02em;
 }
 
+/* always on screen, only the words change, so nothing below moves when playback starts */
+.now-time-label {
+    display: block;
+    margin-bottom: var(--space-1);
+    color: var(--ink-soft);
+    font: 600 0.875rem/1.2 var(--sans);
+    letter-spacing: 0;
+}
+
+/* fixed size in every state, so play/pause and fullscreen never move */
+.now-actions {
+    display: flex;
+    gap: var(--space-4);
+    margin-left: auto;
+}
+
 .btn-play {
     width: 72px;
     height: 72px;
@@ -413,20 +429,12 @@ a:hover {
     background: var(--cursor-hover);
 }
 
-.btn-play.is-continue {
-    flex: 1 0 auto;
-    width: auto;
-    max-width: 100%;
-    padding: 0 var(--space-4) 0 var(--space-3);
-}
-
 /* our own fullscreen button replaces YouTube's, which sits right next to the progress bar */
 .btn-fullscreen {
     width: 72px;
     height: 72px;
     padding: 0;
     flex: none;
-    margin-left: auto;
 }
 
 .btn-fullscreen:disabled {
@@ -482,11 +490,6 @@ a:hover {
 
 .player-frame:-webkit-full-screen .fullscreen-exit {
     display: inline-flex;
-}
-
-.btn-play-label {
-    font: 600 1.375rem/1 var(--pixel);
-    font-feature-settings: var(--pixel-features);
 }
 
 .btn-play:disabled {

@@ -7,7 +7,7 @@
     <meta name="description" content="Watch very long YouTube videos and series across many sessions. ResumePlay keeps your place.">
     <meta name="theme-color" content="#0A0F2E">
     <link rel="preload" href="fonts/PixelifySans.ttf" as="font" type="font/ttf" crossorigin>
-    <link rel="stylesheet" href="style.css?id=407">
+    <link rel="stylesheet" href="style.css?id=408">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" sizes="16x16" href="icon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="icon-32x32.png">
@@ -88,14 +88,15 @@
             <h2 class="now-title" id="now-title"></h2>
             <p class="now-meta" id="now-meta"></p>
             <div class="now-row">
-                <p class="now-time"><span class="visually-hidden">Saved position </span><span id="now-time">0:00:00</span></p>
-                <button type="button" class="btn btn-ghost btn-fullscreen" id="fullscreen-button" aria-label="Fullscreen" title="Fullscreen" disabled hidden>
-                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-fullscreen"/></svg>
-                </button>
-                <button type="button" class="btn btn-play" id="play-toggle" aria-label="Play" disabled>
-                    <svg class="icon icon-lg" aria-hidden="true"><use href="#i-play"/></svg>
-                    <span class="btn-play-label" id="play-label" hidden>Continue</span>
-                </button>
+                <p class="now-time"><span class="now-time-label" id="now-time-label">Position</span> <span id="now-time">0:00:00</span></p>
+                <div class="now-actions">
+                    <button type="button" class="btn btn-ghost btn-fullscreen" id="fullscreen-button" aria-label="Fullscreen" title="Fullscreen" disabled hidden>
+                        <svg class="icon icon-lg" aria-hidden="true"><use href="#i-fullscreen"/></svg>
+                    </button>
+                    <button type="button" class="btn btn-play" id="play-toggle" aria-label="Play" disabled>
+                        <svg class="icon icon-lg" aria-hidden="true"><use href="#i-play"/></svg>
+                    </button>
+                </div>
             </div>
             <div class="now-controls">
                 <div class="option">
@@ -150,6 +151,6 @@
     </nav>
 </footer>
 
-<script src="app.js?id=406"></script>
+<script src="app.js?id=407"></script>
 </body>
 </html>
